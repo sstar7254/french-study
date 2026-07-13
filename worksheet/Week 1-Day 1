@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1주차 연습지 (1) — 토론토의 아침</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f8f7f2;
+    --ruling:#dbe7f0;
+    --marge:#e8737e;
+    --ink:#20409a;        /* Bic 볼펜 파랑 */
+    --ink-soft:#4a63b0;
+    --graphite:#3a3a38;
+    --graphite-soft:#6b6b66;
+    --correct:#2e7d4f;
+    --wrong:#c0392b;
+    --card:#ffffff;
+    --focus:#20409a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *{transition:none !important;animation:none !important}
+  }
+  body{
+    font-family:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    color:var(--graphite);
+    background:
+      linear-gradient(to right, transparent 0, transparent 52px, var(--marge) 52px, var(--marge) 54px, transparent 54px),
+      repeating-linear-gradient(to bottom, var(--paper) 0, var(--paper) 27px, var(--ruling) 27px, var(--ruling) 28px);
+    background-color:var(--paper);
+    line-height:1.75;
+    padding:32px 16px 96px;
+  }
+  .cahier{max-width:700px;margin:0 auto;padding-left:52px}
+  @media (max-width:560px){
+    body{background:
+      linear-gradient(to right, transparent 0, transparent 20px, var(--marge) 20px, var(--marge) 22px, transparent 22px),
+      repeating-linear-gradient(to bottom, var(--paper) 0, var(--paper) 27px, var(--ruling) 27px, var(--ruling) 28px);
+      background-color:var(--paper);}
+    .cahier{padding-left:20px}
+  }
+
+  .fr{font-family:'Caveat',cursive;color:var(--ink)}
+  h1{font-family:'Caveat',cursive;color:var(--ink);font-size:2.6rem;font-weight:700;line-height:1.2}
+  .subtitle{color:var(--graphite-soft);font-size:.95rem;margin-top:4px}
+
+  header{margin-bottom:28px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+  .tag{font-size:.78rem;border:1px solid var(--ink-soft);color:var(--ink-soft);padding:2px 10px;border-radius:999px;background:rgba(255,255,255,.6)}
+
+  /* 모드 토글 */
+  .mode-toggle{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden;background:#fff}
+  .mode-toggle button{
+    font-family:inherit;font-size:.85rem;padding:5px 14px;border:none;background:transparent;
+    color:var(--ink);cursor:pointer
+  }
+  .mode-toggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .mode-hint{font-size:.78rem;color:var(--graphite-soft);margin-top:6px}
+
+  section{
+    background:var(--card);
+    border:1px solid #e5e2d8;
+    border-radius:10px;
+    box-shadow:0 1px 3px rgba(32,64,154,.06);
+    padding:26px 26px 30px;
+    margin-bottom:34px;
+    position:relative;
+  }
+  section::before{
+    content:attr(data-label);
+    font-family:'Caveat',cursive;
+    position:absolute;top:-14px;left:18px;
+    background:var(--marge);color:#fff;
+    font-size:1.05rem;padding:1px 14px;border-radius:999px;letter-spacing:.5px;
+  }
+  section h2{font-size:1.15rem;color:var(--graphite);margin-bottom:6px}
+  .lead{color:var(--graphite-soft);font-size:.92rem;margin-bottom:18px}
+
+  .q{margin:22px 0}
+  .q p.prompt{font-weight:600;margin-bottom:10px}
+  .bebe-only,.eonni-only{display:none}
+  body[data-mode="bebe"] .bebe-only{display:block}
+  body[data-mode="eonni"] .eonni-only{display:block}
+
+  textarea,input[type="text"]{
+    width:100%;font-family:inherit;font-size:1rem;line-height:1.7;
+    border:1.5px dashed #c9c4b4;border-radius:8px;background:#fdfcf8;
+    padding:12px 14px;color:var(--graphite);resize:vertical;
+  }
+  textarea:focus,input:focus,button:focus-visible{outline:3px solid rgba(32,64,154,.35);outline-offset:2px}
+  textarea{min-height:88px}
+
+  .choices{display:flex;flex-direction:column;gap:10px}
+  .choice{
+    text-align:left;font-family:inherit;font-size:1rem;cursor:pointer;
+    border:1.5px solid #d8d4c6;border-radius:8px;background:#fdfcf8;padding:11px 16px;
+    transition:border-color .15s, background .15s;
+  }
+  .choice:hover{border-color:var(--ink-soft)}
+  .choice.picked-right{border-color:var(--correct);background:#eef7f0}
+  .choice.picked-wrong{border-color:var(--wrong);background:#fbeeec}
+  .reveal{
+    display:none;margin-top:12px;padding:12px 16px;border-left:3px solid var(--ink);
+    background:#f2f5fc;border-radius:0 8px 8px 0;font-size:.95rem;
+  }
+  .reveal.show{display:block}
+
+  .btn{
+    font-family:inherit;font-size:.92rem;cursor:pointer;
+    border:1.5px solid var(--ink);color:var(--ink);background:#fff;
+    padding:8px 18px;border-radius:999px;transition:background .15s,color .15s;
+  }
+  .btn:hover{background:var(--ink);color:#fff}
+  .btn.primary{background:var(--ink);color:#fff}
+  .btn.primary:hover{background:#16307a}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+  .tts-btn{display:inline-flex;align-items:center;gap:8px}
+  .tts-btn::before{content:"▶";font-size:.75rem}
+  .tts-btn.speaking::before{content:"■"}
+
+  .passage{
+    font-size:1.08rem;line-height:2.1;color:var(--graphite);
+    background:#fdfcf8;border:1px solid #eee9da;border-radius:8px;padding:18px 20px;margin:14px 0;
+  }
+  .passage .fr{font-size:1.35rem;line-height:1.9}
+
+  /* 빈도 스펙트럼 정렬 */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .chip{
+    font-family:'Caveat',cursive;font-size:1.25rem;color:var(--ink);
+    border:1.5px solid var(--ink-soft);background:#fff;border-radius:999px;
+    padding:2px 16px;cursor:pointer;
+  }
+  .chip[disabled]{opacity:.35;cursor:default}
+  .slots{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-height:44px;margin:8px 0;
+    border:1.5px dashed #c9c4b4;border-radius:8px;padding:8px 10px;background:#fdfcf8}
+  .slots .placed{font-family:'Caveat',cursive;font-size:1.25rem;color:#fff;background:var(--ink);
+    border-radius:999px;padding:2px 16px;cursor:pointer}
+  .spectrum-labels{display:flex;justify-content:space-between;font-size:.8rem;color:var(--graphite-soft)}
+
+  /* dictée diff */
+  .diff{margin-top:10px;font-size:1.05rem;display:none}
+  .diff.show{display:block}
+  .diff .w-ok{color:var(--correct);font-weight:600}
+  .diff .w-no{color:var(--wrong);text-decoration:line-through}
+  .diff .w-miss{color:var(--wrong);border-bottom:2px dotted var(--wrong)}
+
+  /* 분기 */
+  .fork{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+  .hidden{display:none !important}
+
+  .video-card{
+    display:block;border:1.5px solid var(--ink-soft);border-radius:10px;background:#f2f5fc;
+    padding:16px 18px;text-decoration:none;color:var(--graphite);margin:12px 0;
+  }
+  .video-card:hover{background:#e7edfb}
+  .video-card .vc-title{font-family:'Caveat',cursive;font-size:1.5rem;color:var(--ink)}
+  .video-card .vc-sub{font-size:.85rem;color:var(--graphite-soft)}
+
+  .rec-status{font-size:.88rem;color:var(--graphite-soft);margin-top:8px}
+  audio{width:100%;margin-top:10px}
+
+  .copy-done{display:none;color:var(--correct);font-weight:600;margin-top:10px}
+  .copy-done.show{display:block}
+
+  footer{margin-top:40px;text-align:center;color:var(--graphite-soft);font-size:.85rem}
+  footer .fr{font-size:1.4rem}
+</style>
+</head>
+<body data-mode="eonni">
+<div class="cahier">
+
+<header>
+  <h1>Semaine 1 · Cahier n°1</h1>
+  <p class="subtitle">1주차 연습지 (1) — 오늘의 테마: <strong>토론토의 아침</strong>. 이번 주에는 지금 일어나는 일들, 그리고 얼마나 자주 일어나는지에 주목해 보겠습니다.</p>
+  <div class="meta">
+    <span class="tag">코어 10~15분</span>
+    <span class="tag">확장 +10분</span>
+    <div class="mode-toggle" role="group" aria-label="모드 선택">
+      <button id="btn-bebe" aria-pressed="false" onclick="setMode('bebe')">🐣 베베 모드</button>
+      <button id="btn-eonni" aria-pressed="true" onclick="setMode('eonni')">💁 언니 모드</button>
+    </div>
+  </div>
+  <p class="mode-hint">피곤한 날은 베베 모드로 푸세요. 같은 연습지가 조금 만만해집니다.</p>
+</header>
+
+<!-- ══════════ OUVERTURE ══════════ -->
+<section data-label="Ouverture">
+  <h2>몸풀기 퀴즈</h2>
+  <p class="lead">토론토에 대한 문장입니다: <span class="fr" style="font-size:1.4rem">« L'hiver est toujours là. »</span></p>
+  <div class="q">
+    <p class="prompt">여기서 toujours, 무슨 뜻일까요?</p>
+    <div class="choices" id="quiz1">
+      <button class="choice" onclick="quiz1(this,false)">항상 — 겨울은 항상 거기에 있다</button>
+      <button class="choice" onclick="quiz1(this,false)">여전히 — 겨울이 아직도 안 갔다</button>
+    </div>
+    <div class="reveal" id="quiz1-reveal">
+      정답은 <strong>둘 다</strong>입니다. toujours는 문맥에 따라 '항상'도 되고 '여전히'도 됩니다.
+      그리고 4월의 토론토에서는 두 뜻이 사실상 같은 말이기도 합니다.
+      오늘은 이렇게 '얼마나 자주'를 말하는 단어들을 실컷 만나 보겠습니다.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ INPUT ══════════ -->
+<section data-label="Input">
+  <h2>글을 잘 읽어봅시다</h2>
+  <p class="lead">토론토에 사는 누군가의 아침입니다. 사전은 잠시 덮어두고, 모르는 단어가 있어도 꿋꿋하게 끝까지 읽어 보세요. 눈으로 한 번, 귀로 한 번.</p>
+
+  <div class="passage">
+    <p class="fr" id="passage-text">Le matin, à Toronto, je me lève toujours à six heures. Je prends souvent le tramway pour aller au travail, mais quand il neige, le tramway est parfois en retard. Alors je marche. Les Torontois disent que l'hiver dure six mois, mais ce n'est pas vrai : il dure sept mois. Le week-end, je ne travaille jamais. Je vais souvent au marché St. Lawrence, et je bois toujours un café avant de rentrer.</p>
+  </div>
+  <div class="btn-row">
+    <button class="btn tts-btn" onclick="speak(document.getElementById('passage-text').textContent, this)">전체 듣기</button>
+    <button class="btn tts-btn" onclick="speak(document.getElementById('passage-text').textContent, this, 0.72)">천천히 듣기</button>
+  </div>
+
+  <div class="q">
+    <p class="prompt">Q1. 이 글은 어떤 글인가요? 한국어 <u>한 문장</u>으로 요지를 적어 보세요. 전부 이해하지 못해도 괜찮습니다. 잡힌 만큼만.</p>
+    <textarea data-answer="Q1 요지 한 문장" placeholder="예: ~에 대한 글이다."></textarea>
+  </div>
+
+  <div class="q">
+    <p class="prompt">Q2. 글쓴이에게 토론토의 겨울은 몇 달인가요?</p>
+    <div class="choices">
+      <button class="choice" onclick="quiz2(this,false)">6개월 — 토론토 사람들이 그렇게 말하니까</button>
+      <button class="choice" onclick="quiz2(this,true)">7개월 — 글쓴이는 더 겪어봤으니까</button>
+    </div>
+    <div class="reveal" id="quiz2-reveal">
+      맞습니다. <span class="fr" style="font-size:1.2rem">mais ce n'est pas vrai : il dure sept mois</span> — 남들이 말하는 것과 글쓴이의 의견이 갈리는 지점을 잡으셨다면, 오늘 읽기는 이미 성공입니다.
+    </div>
+  </div>
+
+  <div class="q">
+    <p class="prompt" >Q3.
+      <span class="eonni-only">글 안에서 '얼마나 자주'를 말하는 단어를 눈에 보이는 대로 찾아 적어 보세요. (찾은 그대로, 철자 틀려도 됩니다)</span>
+      <span class="bebe-only">글 안에서 여러 번 반복해서 나오는 단어가 있었나요? 눈에 띈 것들을 한국어로든 프랑스어로든 적어 보세요.</span>
+    </p>
+    <textarea data-answer="Q3 빈도 표현 찾기"></textarea>
+  </div>
+</section>
+
+<!-- ══════════ DICTÉE ══════════ -->
+<section data-label="Dictée">
+  <h2>들리는 대로 적어봅시다</h2>
+  <p class="lead">문장 세 개를 들려드립니다. 여러 번 들어도 됩니다. 다 적은 뒤 채점 버튼을 누르면 원문과 비교해 드립니다.</p>
+
+  <div class="q" id="dictee-area"></div>
+</section>
+
+<!-- ══════════ 분기 ══════════ -->
+<section data-label="Pause" id="fork-section">
+  <h2>여기까지가 코어입니다</h2>
+  <p class="lead">노래 한 곡이 준비되어 있습니다. 더 할까요?</p>
+  <div class="fork">
+    <button class="btn primary" onclick="openExpansion()">더 할까요? 🎵</button>
+    <button class="btn" onclick="skipExpansion()">오늘은 그만</button>
+  </div>
+</section>
+
+<!-- ══════════ EXPANSION (노래) ══════════ -->
+<section data-label="Écho" id="expansion" class="hidden">
+  <h2>노래로 갑니다 — Zaz, « Je veux »</h2>
+  <p class="lead">파리 골목의 목소리로 유명한 곡입니다. 가사를 읽으려 하지 말고, 소리를 잡으세요.</p>
+
+  <a class="video-card" href="https://www.youtube.com/results?search_query=zaz+je+veux+official" target="_blank" rel="noopener">
+    <span class="vc-title">Zaz — Je veux ↗</span><br>
+    <span class="vc-sub">유튜브에서 열기 (공식 영상 또는 라이브 버전 아무거나 좋습니다)</span>
+  </a>
+
+  <div class="q">
+    <p class="prompt">Q4. 첫 후렴까지 들으면서, <span class="fr" style="font-size:1.2rem">je veux</span> 가 몇 번 들리는지 세어 보세요.</p>
+    <input type="text" data-answer="Q4 je veux 횟수" placeholder="숫자만 적어도 됩니다">
+  </div>
+
+  <div class="q">
+    <p class="prompt">Q5.
+      <span class="eonni-only">한 번 더 들으면서, 들리는 프랑스어 단어를 잡히는 대로 전부 적어 보세요. 철자는 몰라도 소리 나는 대로!</span>
+      <span class="bebe-only">한 번 더 들으면서, 무슨 이야기를 하는 노래일지 한국어로 짐작해서 적어 보세요.</span>
+    </p>
+    <textarea data-answer="Q5 노래에서 잡은 것"></textarea>
+  </div>
+
+  <div class="q">
+    <p class="prompt">Q6. 도~레~미~ 시간. 후렴 한 소절을 골라, 들리는 그대로 서너 번 따라 해 보세요. 가장 잘 된 버전을 녹음해서 스스로 들어봅시다. 음정은 넣어도 되고 안 넣어도 됩니다(?)</p>
+    <div class="btn-row">
+      <button class="btn" id="rec-btn" onclick="toggleRec()">🎙 녹음 시작</button>
+    </div>
+    <p class="rec-status" id="rec-status">마이크 권한을 물어보면 허용해 주세요. 녹음은 이 페이지 밖으로 나가지 않습니다.</p>
+    <audio id="rec-audio" controls class="hidden"></audio>
+  </div>
+</section>
+
+<!-- ══════════ PRODUCTION ══════════ -->
+<section data-label="Production" id="production">
+  <h2>이제 내 이야기를 뱉을 차례</h2>
+  <p class="lead">자고 일어나니 토론토 일상 브이로거가 되었다고 칩시다. 프랑스어권 구독자들이 당신의 평범한 하루를 궁금해합니다.</p>
+
+  <div class="q">
+    <p class="prompt">
+      <span class="eonni-only">나의 하루를 프랑스어 4~5문장으로 소개해 봅시다. 오늘 만난 '자주' 단어(toujours, souvent, parfois, jamais...)를 두 개 이상 넣어 보세요. 틀려도 뱉는 게 이깁니다.</span>
+      <span class="bebe-only">나의 하루를 프랑스어 2~3문장으로 소개해 봅시다. 짧아도 됩니다. Je... 로 시작하면 절반은 온 겁니다.</span>
+    </p>
+    <textarea data-answer="Q7 나의 하루 (작문)" style="min-height:130px" placeholder="Bonjour à tous ! ..."></textarea>
+  </div>
+
+  <div class="q">
+    <p class="prompt">보너스: 위에서 쓴 문장 중 하나를 골라 듣고 따라 말해 보세요.</p>
+    <div class="btn-row">
+      <button class="btn tts-btn" onclick="speakMyLine(this)">내 첫 문장 들어보기</button>
+    </div>
+    <p class="rec-status">발음이 궁금한 문장이 있으면 나중에 대화에서 물어봐도 됩니다.</p>
+  </div>
+</section>
+
+<!-- ══════════ CLÔTURE ══════════ -->
+<section data-label="Clôture" id="cloture">
+  <h2>피드백 받고 끝!</h2>
+
+  <div class="q">
+    <p class="prompt">오늘 헷갈렸던 것 하나, 새로 자리 잡은 것 하나를 한국말로 정리해 봅시다.</p>
+    <textarea data-answer="메타인지 정리"></textarea>
+  </div>
+
+  <div class="q">
+    <p class="prompt">자유 피드백: 오늘 연습지는 어땠나요?</p>
+    <textarea data-answer="자유 피드백" style="min-height:70px"></textarea>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn primary" onclick="copyAll()">📋 답변 전체 복사</button>
+  </div>
+  <p class="copy-done" id="copy-done">복사되었습니다! Claude와의 대화에 붙여넣으면 피드백을 받을 수 있어요.</p>
+</section>
+
+<footer>
+  <span class="fr">Bon courage, et à demain !</span><br>
+  Semaine 1 · présent & 빈도 표현 · Set 1/120
+</footer>
+</div>
+
+<script>
+/* ───────── 모드 ───────── */
+function setMode(m){
+  document.body.dataset.mode = m;
+  document.getElementById('btn-bebe').setAttribute('aria-pressed', m==='bebe');
+  document.getElementById('btn-eonni').setAttribute('aria-pressed', m==='eonni');
+}
+
+/* ───────── 퀴즈 ───────── */
+function quiz1(btn){
+  document.querySelectorAll('#quiz1 .choice').forEach(b=>{b.classList.add('picked-right');b.disabled=true;});
+  document.getElementById('quiz1-reveal').classList.add('show');
+  logChoice('Ouverture 퀴즈(toujours)', btn.textContent.trim());
+}
+function quiz2(btn, right){
+  btn.classList.add(right ? 'picked-right' : 'picked-wrong');
+  if(right){
+    btn.closest('.choices').querySelectorAll('.choice').forEach(b=>b.disabled=true);
+    document.getElementById('quiz2-reveal').classList.add('show');
+  }
+  logChoice('Q2 겨울 길이', btn.textContent.trim() + (right?' (정답)':' (오답 후 재시도)'));
+}
+const choiceLog = {};
+function logChoice(k,v){ choiceLog[k]=v; }
+
+/* ───────── TTS ───────── */
+let frVoice = null;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  frVoice = vs.find(v=>v.lang==='fr-FR') || vs.find(v=>v.lang && v.lang.startsWith('fr')) || null;
+}
+if('speechSynthesis' in window){
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+function speak(text, btn, rate){
+  if(!('speechSynthesis' in window)){
+    alert('이 브라우저에서는 음성 재생이 지원되지 않습니다. 크롬이나 사파리에서 열어보세요.');
+    return;
+  }
+  if(speechSynthesis.speaking){ speechSynthesis.cancel(); resetTtsBtns(); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'fr-FR';
+  if(frVoice) u.voice = frVoice;
+  u.rate = rate || 0.88;
+  if(btn){ btn.classList.add('speaking'); u.onend = u.onerror = ()=>btn.classList.remove('speaking'); }
+  speechSynthesis.speak(u);
+}
+function resetTtsBtns(){ document.querySelectorAll('.tts-btn').forEach(b=>b.classList.remove('speaking')); }
+function speakMyLine(btn){
+  const ta = document.querySelector('[data-answer="Q7 나의 하루 (작문)"]');
+  const first = (ta.value.split(/[.!?\n]/)[0]||'').trim();
+  if(!first){ alert('먼저 위 칸에 문장을 하나 적어 주세요!'); return; }
+  speak(first, btn, 0.85);
+}
+
+/* ───────── Dictée ───────── */
+const dictees = [
+  "Je bois toujours un café le matin.",
+  "Il neige souvent en janvier.",
+  "Je ne prends jamais le métro le dimanche."
+];
+const dArea = document.getElementById('dictee-area');
+dictees.forEach((s,i)=>{
+  const wrap = document.createElement('div');
+  wrap.className='q';
+  wrap.innerHTML = `
+    <p class="prompt">문장 ${i+1}</p>
+    <div class="btn-row" style="margin-bottom:8px">
+      <button class="btn tts-btn" onclick="speak(dictees[${i}], this)">듣기</button>
+      <button class="btn tts-btn" onclick="speak(dictees[${i}], this, 0.65)">아주 천천히</button>
+    </div>
+    <input type="text" id="d-in-${i}" data-answer="Dictée ${i+1}" placeholder="들리는 대로 적어 보세요" autocomplete="off">
+    <div class="btn-row"><button class="btn" onclick="grade(${i})">채점</button></div>
+    <p class="diff" id="d-out-${i}"></p>`;
+  dArea.appendChild(wrap);
+});
+function norm(w){ return w.toLowerCase().normalize('NFC').replace(/[.,!?;:'’«»]/g,''); }
+function grade(i){
+  const ref = dictees[i].split(/\s+/);
+  const got = document.getElementById('d-in-'+i).value.trim().split(/\s+/).filter(Boolean);
+  const out = document.getElementById('d-out-'+i);
+  const gotNorm = got.map(norm);
+  let html = '';
+  ref.forEach(rw=>{
+    const idx = gotNorm.indexOf(norm(rw));
+    if(idx > -1){ html += `<span class="w-ok">${rw}</span> `; gotNorm[idx] = null; }
+    else { html += `<span class="w-miss">${rw}</span> `; }
+  });
+  const extras = got.filter((w,k)=>gotNorm[k]!==null);
+  if(extras.length) html += ` &nbsp;·&nbsp; 원문에 없는 표기: ` + extras.map(w=>`<span class="w-no">${w}</span>`).join(' ');
+  out.innerHTML = '원문: ' + html;
+  out.classList.add('show');
+}
+
+/* ───────── 분기 ───────── */
+let expansionChoice = '미선택';
+function openExpansion(){
+  expansionChoice = '더 할까요 (노래 확장 진행)';
+  document.getElementById('expansion').classList.remove('hidden');
+  document.getElementById('fork-section').classList.add('hidden');
+  document.getElementById('expansion').scrollIntoView({behavior:'smooth'});
+}
+function skipExpansion(){
+  expansionChoice = '오늘은 그만 (코어만)';
+  document.getElementById('fork-section').classList.add('hidden');
+  document.getElementById('production').scrollIntoView({behavior:'smooth'});
+}
+
+/* ───────── 녹음 ───────── */
+let mediaRecorder = null, chunks = [];
+async function toggleRec(){
+  const btn = document.getElementById('rec-btn');
+  const status = document.getElementById('rec-status');
+  if(mediaRecorder && mediaRecorder.state === 'recording'){
+    mediaRecorder.stop();
+    btn.textContent = '🎙 녹음 시작';
+    return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder = new MediaRecorder(stream);
+    chunks = [];
+    mediaRecorder.ondataavailable = e=>chunks.push(e.data);
+    mediaRecorder.onstop = ()=>{
+      const blob = new Blob(chunks, {type: mediaRecorder.mimeType || 'audio/webm'});
+      const audio = document.getElementById('rec-audio');
+      audio.src = URL.createObjectURL(blob);
+      audio.classList.remove('hidden');
+      status.textContent = '녹음 완료! 원곡과 번갈아 들어보며 다른 지점을 찾아보세요.';
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    mediaRecorder.start();
+    btn.textContent = '⏹ 녹음 끝내기';
+    status.textContent = '녹음 중...';
+  }catch(err){
+    status.textContent = '마이크를 사용할 수 없는 환경이네요. 휴대폰 녹음 앱으로 대신해도 충분합니다.';
+  }
+}
+
+/* ───────── 답변 전체 복사 ───────── */
+function copyAll(){
+  const lines = [];
+  lines.push('=== 1주차 연습지 (1) — 토론토의 아침 ===');
+  lines.push('시드: présent / 빈도 표현');
+  lines.push('모드: ' + (document.body.dataset.mode === 'bebe' ? '베베' : '언니'));
+  lines.push('확장 분기: ' + expansionChoice);
+  lines.push('');
+  Object.entries(choiceLog).forEach(([k,v])=>lines.push(`[${k}] ${v}`));
+  document.querySelectorAll('[data-answer]').forEach(el=>{
+    const v = el.value.trim();
+    lines.push(`[${el.dataset.answer}]`);
+    lines.push(v ? v : '(무응답)');
+    lines.push('');
+  });
+  lines.push('→ 피드백 부탁해요!');
+  const text = lines.join('\n');
+  const done = ()=>{ document.getElementById('copy-done').classList.add('show'); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text, done));
+  } else { fallbackCopy(text, done); }
+}
+function fallbackCopy(text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); done(); }
+  catch(e){ alert('복사가 막힌 환경입니다. 답변을 직접 드래그해서 복사해 주세요.'); }
+  document.body.removeChild(ta);
+}
+</script>
+</body>
+</html>
